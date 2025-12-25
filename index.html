@@ -4,67 +4,65 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>WEB JUMPER</title>
-<link href="https://fonts.googleapis.com/css2?familyPress+Start+2P&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0b1a; --neon:#00ffd5; --accent:#ff4dff; --muted:#9aa0c3;
 }
-html,body{height:100%;margin:0;background:linear-gradient(180deg,#05050a 0%, #07102a 60%);color:var(--muted);font-family:'Press Start 2P', monospace;}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#05050a 0%, #07102a 60%);color:var(--muted);font-family: 'Press Start 2P', monospace;}
 .wrap{max-width:1200px;margin:28px auto;padding:18px;}
 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-h1{color:var(--neon);font-size:20px;margin:0}
+h1{color:var(--neon);font-size:20px;letter-spacing:2px;margin:0;text-shadow:0 0 8px rgba(0,255,213,0.14)}
 .sub{font-size:10px;color:#7c84a7}
-.center-controls{display:flex;gap:12px;justify-content:center;margin:18px 0}
-.btn{background:transparent;border:2px solid var(--neon);padding:10px 16px;border-radius:8px;color:var(--neon);cursor:pointer}
+.center-controls{display:flex;gap:12px;align-items:center;justify-content:center;margin:18px 0}
+.btn{background:transparent;border:2px solid var(--neon);padding:10px 16px;border-radius:8px;color:var(--neon);cursor:pointer;backdrop-filter: blur(2px);}
 .btn.secondary{border-color:var(--accent);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.card{background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;display:flex;flex-direction:column;gap:10px}
-.banner{height:80px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#05050a}
-.domain{font-size:10px;word-break:break-all}
+.card{background:linear-gradient(135deg,rgba(255,255,255,0.02),rgba(0,0,0,0.08));border:1px solid rgba(255,255,255,0.04);padding:12px;border-radius:8px;display:flex;flex-direction:column;align-items:stretch;gap:10px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+.banner{height:80px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#05050a;text-transform:uppercase;font-weight:700;}
+.domain{font-size:10px;color:var(--muted);word-break:break-all}
 a.card-link{text-decoration:none}
 .status{font-size:10px;padding:6px;border-radius:6px;text-align:center}
-.ok{background:rgba(0,255,213,0.12);color:var(--neon)}
-.dead{background:rgba(255,77,255,0.12);color:var(--accent)}
-.sale{background:rgba(255,255,0,0.15);color:#ffd700}
-.stripe-1{background:linear-gradient(135deg,#ff9fd6,#7be0ff)}
-.stripe-2{background:linear-gradient(135deg,#ffd16b,#60d394)}
-.stripe-3{background:linear-gradient(135deg,#8a7bff,#ff7bd6)}
-footer{text-align:center;font-size:10px;margin-top:18px}
+.ok{background:rgba(0,255,213,0.12);color:var(--neon);border:1px solid rgba(0,255,213,0.08)}
+.dead{background:rgba(255,77,255,0.04);color:var(--accent);border:1px solid rgba(255,77,255,0.06)}
+.sale{background:rgba(255,255,0,0.1);color:#ffd700;border:1px solid rgba(255,255,0,0.2)}
+footer{margin-top:18px;font-size:10px;color:#6f7597;text-align:center}
+.stripe-1{background:repeating-linear-gradient(90deg, #ffd8a6 0 8px, transparent 8px 16px), linear-gradient(135deg,#ff9fd6,#7be0ff);}
+.stripe-2{background:repeating-linear-gradient(90deg, #b7f7d6 0 8px, transparent 8px 16px), linear-gradient(135deg,#ffd16b,#60d394);}
+.stripe-3{background:repeating-linear-gradient(90deg, #c4d6ff 0 8px, transparent 8px 16px), linear-gradient(135deg,#8a7bff,#ff7bd6);}
+@media (max-width:600px){h1{font-size:14px} .banner{height:72px}}
 </style>
 </head>
-
 <body>
 <div class="wrap">
 <header>
   <div>
     <h1>WEB JUMPER</h1>
-    <div class="sub">Retro random linkboard</div>
+    <div class="sub">A retro linkboard — click a banner to open a site in a new tab.</div>
+  </div>
+  <div style="text-align:right">
+    <div class="sub">Auto-generates links & checks basic availability</div>
   </div>
 </header>
 
 <div class="center-controls">
   <button id="clearBtn" class="btn">CLEAR UNAVAILABLE</button>
-  <button id="regenBtn" class="btn secondary">RE-GENERATE</button>
-  <button id="recheckBtn" class="btn">RE-CHECK</button>
+  <button id="regenBtn" class="btn secondary">RE-GENERATE NEW SET</button>
+  <button id="recheckBtn" class="btn">RE-CHECK AVAILABILITY</button>
 </div>
 
 <main>
-  <div id="grid" class="grid"></div>
+  <div id="grid" class="grid" aria-live="polite"></div>
 </main>
 
 <footer>
-Domains marked "On Sale" are parked sellers like GoDaddy, Sedo, etc.
+Tip: links open in a new tab. Unavailable or on-sale sites are replaced by the "CLEAR UNAVAILABLE" button.
 </footer>
 </div>
 
 <script>
-const tlds = ['com','net','org','io','xyz','dev','site','tech','online','co','us','gg','me','info','club','app','store'];
-const PARKING_HOSTS = [
-  'godaddy.com','dan.com','sedo.com','namecheap.com',
-  'afternic.com','hugedomains.com','onlinenic.com'
-];
-
+const tlds = ['com','net','org','io','xyz','dev','site','tech','online','co','us','gg','me','space','world','games','info','club','app','store'];
 const grid = document.getElementById('grid');
 const clearBtn = document.getElementById('clearBtn');
 const regenBtn = document.getElementById('regenBtn');
@@ -72,117 +70,149 @@ const recheckBtn = document.getElementById('recheckBtn');
 
 let currentSet = [];
 
-function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
-function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min }
 
 function makeDomain(){
-  let name='';
-  const chars='abcdefghijklmnopqrstuvwxyz';
-  for(let i=0;i<rand(3,10);i++) name+=chars[rand(0,25)];
-  if(Math.random()<0.2) name+=rand(2,99);
-  return name+'.'+pick(tlds);
+  const length = randInt(3,10);
+  let name = '';
+  const letters = 'abcdefghijklmnopqrstuvwxyz';
+  for(let i=0;i<length;i++) name += letters[Math.floor(Math.random()*letters.length)];
+  if(Math.random() < 0.2) name += String(randInt(2,99));
+  return name + '.' + randomChoice(tlds);
 }
 
-function generateSet(n=30){
-  const s=new Set();
-  while(s.size<n) s.add(makeDomain());
-  return currentSet=[...s];
+function generateSet(count=30){
+  const set = new Set();
+  while(set.size<count) set.add(makeDomain());
+  currentSet = Array.from(set);
+  return currentSet;
 }
 
-function createCard(domain,idx){
-  const a=document.createElement('a');
+function createCard(domain, idx){
+  const a = document.createElement('a');
   a.className='card-link';
+  const card = document.createElement('div');
+  card.className='card';
+
+  const banner = document.createElement('div');
+  banner.className='banner ' + (['stripe-1','stripe-2','stripe-3'][idx%3]);
+  banner.textContent = domain.split('.')[0].toUpperCase();
+
+  const domainEl = document.createElement('div');
+  domainEl.className='domain';
+  domainEl.textContent = domain;
+
+  const status = document.createElement('div');
+  status.className='status';
+  status.textContent='Checking...';
+
+  card.appendChild(banner);
+  card.appendChild(domainEl);
+  card.appendChild(status);
+  a.appendChild(card);
+
   a.href='https://'+domain;
   a.target='_blank';
+  a.rel='noopener noreferrer';
 
-  const c=document.createElement('div');
-  c.className='card';
-
-  const b=document.createElement('div');
-  b.className='banner stripe-'+((idx%3)+1);
-  b.textContent=domain.split('.')[0].toUpperCase();
-
-  const d=document.createElement('div');
-  d.className='domain';
-  d.textContent=domain;
-
-  const s=document.createElement('div');
-  s.className='status';
-  s.textContent='Checking...';
-
-  c.append(b,d,s);
-  a.appendChild(c);
-  return {a,s};
+  return {element:a,statusEl:status};
 }
 
-async function checkAvailabilityAsync(domain){
-  try{
-    const dns=await fetch(`https://dns.google/resolve?name=${domain}&type=A`).then(r=>r.json());
-    if(!dns.Answer) return 'dead';
-  }catch{return 'dead'}
+function checkAvailabilityAsync(domain){
+  return new Promise((resolve)=>{
+    const candidates = [`https://${domain}/favicon.ico`,`https://${domain}/favicon.png`,`https://${domain}`];
+    let tried=0, succeeded=false;
 
-  return new Promise(resolve=>{
-    const iframe=document.createElement('iframe');
-    iframe.style.display='none';
-    iframe.src='https://'+domain;
-    const timeout=setTimeout(()=>{iframe.remove();resolve('dead')},4000);
-
-    iframe.onload=()=>{
-      clearTimeout(timeout);
-      try{
-        const href=iframe.contentWindow.location.href;
-        if(PARKING_HOSTS.some(h=>href.includes(h))) resolve('sale');
-        else resolve('ok');
-      }catch{
-        resolve('ok');
+    function tryNext(){
+      if(tried>=candidates.length){ if(!succeeded) resolve('dead'); return; }
+      const url = candidates[tried++];
+      if(url.endsWith('.ico') || url.endsWith('.png')){
+        const img = new Image();
+        img.src = url+'?_cb='+Date.now();
+        img.onload = ()=>{ succeeded=true; resolve('ok'); };
+        img.onerror = ()=>{ tryNext(); };
+      } else {
+        fetch(url,{method:'GET', mode:'no-cors'})
+        .then(r=>{
+          const textCheck = r.url && (r.url.includes('godaddy.com') || r.url.includes('onlinenic.com'));
+          if(textCheck) resolve('sale');
+          else resolve('ok');
+          succeeded=true;
+        })
+        .catch(()=> tryNext());
       }
-      iframe.remove();
-    };
+    }
 
-    iframe.onerror=()=>{
-      clearTimeout(timeout);
-      iframe.remove();
-      resolve('dead');
-    };
-
-    document.body.appendChild(iframe);
+    tryNext();
+    setTimeout(()=>{ if(!succeeded) resolve('dead'); },3500);
   });
 }
 
 async function render(list){
   grid.innerHTML='';
-  for(let i=0;i<list.length;i++){
-    const {a,s}=createCard(list[i],i);
-    grid.appendChild(a);
-    const r=await checkAvailabilityAsync(list[i]);
-    s.className='status '+(r==='ok'?'ok':r==='sale'?'sale':'dead');
-    s.textContent=r==='ok'?'OK':r==='sale'?'On Sale':'Unavailable';
+  for(let idx=0; idx<list.length; idx++){
+    const {element,statusEl} = createCard(list[idx], idx);
+    grid.appendChild(element);
+    const result = await checkAvailabilityAsync(list[idx]);
+    if(result==='ok'){ statusEl.className='status ok'; statusEl.textContent='OK'; }
+    else if(result==='sale'){ statusEl.className='status sale'; statusEl.textContent='On Sale'; }
+    else{ statusEl.className='status dead'; statusEl.textContent='Unavailable'; }
   }
 }
 
-clearBtn.onclick=async()=>{
-  const statuses=[...document.querySelectorAll('.status')];
-  for(let i=0;i<statuses.length;i++){
-    if(statuses[i].classList.contains('ok')) continue;
-    let d,r;
-    do{
-      d=makeDomain();
-      r=await checkAvailabilityAsync(d);
-    }while(r!=='ok');
-    currentSet[i]=d;
-    statuses[i].textContent='OK';
-    statuses[i].className='status ok';
-    const card=statuses[i].closest('.card-link');
-    card.href='https://'+d;
-    card.querySelector('.domain').textContent=d;
-    card.querySelector('.banner').textContent=d.split('.')[0].toUpperCase();
+// initial generation
+if(!currentSet.length) currentSet = generateSet(30);
+render(currentSet);
+
+// controls
+clearBtn.addEventListener('click', async () => {
+  const statusEls = document.querySelectorAll('.status');
+  
+  for (let idx = 0; idx < statusEls.length; idx++) {
+    const el = statusEls[idx];
+    if(el.classList.contains('dead') || el.classList.contains('sale')){
+      let valid=false;
+      while(!valid){
+        const newDomain = makeDomain();
+        currentSet[idx] = newDomain;
+        const result = await checkAvailabilityAsync(newDomain);
+        if(result==='ok'){
+          valid=true;
+          el.className='status ok';
+          el.textContent='OK';
+          const cardLink = el.closest('.card-link');
+          cardLink.href='https://'+newDomain;
+          cardLink.querySelector('.domain').textContent=newDomain;
+          cardLink.querySelector('.banner').textContent=newDomain.split('.')[0].toUpperCase();
+        }
+      }
+    }
   }
-};
+});
 
-regenBtn.onclick=()=>render(generateSet());
-recheckBtn.onclick=()=>render(currentSet);
+regenBtn.addEventListener('click', ()=>{ currentSet = generateSet(30); render(currentSet); });
 
-render(generateSet());
+recheckBtn.addEventListener('click', async ()=>{
+  const statusEls = document.querySelectorAll('.status');
+  for(let idx=0; idx<statusEls.length; idx++){
+    const el=statusEls[idx];
+    el.className='status'; el.textContent='Re-checking...';
+    const result = await checkAvailabilityAsync(currentSet[idx]);
+    if(result==='ok'){ el.className='status ok'; el.textContent='OK'; }
+    else if(result==='sale'){ el.className='status sale'; el.textContent='On Sale'; }
+    else{ el.className='status dead'; el.textContent='Unavailable'; }
+  }
+});
+
+// keyboard shortcut R
+window.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase()==='r' && !e.metaKey && !e.ctrlKey){
+    e.preventDefault();
+    currentSet = generateSet(30);
+    render(currentSet);
+  }
+});
 </script>
 </body>
 </html>
